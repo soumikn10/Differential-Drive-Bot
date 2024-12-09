@@ -44,3 +44,50 @@ public class Drive extends SubsystemBase {
 }
   private final RelativeEncoder leftEncoder = leftLeader.getEncoder();
   private final RelativeEncoder rightEncoder = rightLeader.getEncoder();
+
+
+
+
+  package robot.drive;
+
+public class DriveConstants {
+  public static final double WHEEL_RADIUS = 0.08; //Meters
+  public static final double CIRCUMFERENCE = 2.0 * Math.PI * WHEEL_RADIUS;
+  public static final double GEARING = 8.0;
+}
+
+    private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(FF.kS, FF.kV);
+      public static final class FF {
+    public static final double kS = 1;
+    public static final double kV = 3;
+  }
+    private final PIDController leftPIDController =
+      new PIDController(PID.kP, PID.kI, PID.kD);
+  private final PIDController rightPIDController =
+      new PIDController(PID.kP, PID.kI, PID.kD);
+       final double leftFeedforward = feedforward.calculate(realLeftSpeed);
+    final double rightFeedforward = feedforward.calculate(realRightSpeed);
+
+    final double leftPID = 
+      leftPIDController.calculate(leftEncoder.getVelocity(), realLeftSpeed);
+    final double rightPID = 
+      rightPIDController.calculate(rightEncoder.getVelocity(), realRightSpeed);
+  }
+    private final DifferentialDrivetrainSim driveSim;
+  // ...
+  public Drive() {
+    // ...
+    driveSim =
+        new DifferentialDrivetrainSim(
+            DCMotor.getMiniCIM(2),
+            DriveConstants.GEARING,
+            DriveConstants.MOI,
+            DriveConstants.DRIVE_MASS,
+            DriveConstants.WHEEL_RADIUS,
+            DriveConstants.TRACK_WIDTH,
+            DriveConstants.STD_DEVS);
+    //...
+  }
+    Monologue.setupMonologue(this, "/Robot", false, true);
+    addPeriodic(Monologue::updateAll, kDefaultPeriod);
+    addPeriodic(FaultLogger::update, 1);
